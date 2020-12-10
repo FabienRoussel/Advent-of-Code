@@ -58,7 +58,7 @@ object Day6 {
 
     def main(args: Array[String]): Unit = {
         println("Day 6 !")
-        //println(countUniqueLettersInGroups())
+        println(countUniqueLettersInGroups())
         println(countCommonLettersInGroups())
     }
 }

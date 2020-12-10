@@ -110,7 +110,7 @@ object Day7 {
 
     def main(args: Array[String]): Unit = {
         println("Day 7 !")
-        //println(countBagOfColorsContainingSGBag())
+        println(countBagOfColorsContainingSGBag())
 
         println(countNumberOfBagOfColorsInSGBag())
     }
