@@ -1,8 +1,6 @@
 package aventofcode
 
-import scala.collection.mutable.Queue
 import scala.io.Source
-import scala.util.control.Breaks.break
 
 object Day8 {
 

@@ -29,11 +29,10 @@ object Day5 {
     def searchMissingSeatID(): Long = {
         val seatsList: List[String]     = readFile()
         var seatsListInId: Array[Int]   = Array()
-        var row: Int = 0
-        var col: Int = 0
+
         seatsList.foreach(el => {
-            row = Integer.parseInt(el.take(7).replace('F', '0').replace('B', '1'), 2)
-            col = Integer.parseInt(el.takeRight(3).replace('L', '0').replace('R', '1'), 2)
+            val row: Int = Integer.parseInt(el.take(7).replace('F', '0').replace('B', '1'), 2)
+            val col: Int = Integer.parseInt(el.takeRight(3).replace('L', '0').replace('R', '1'), 2)
             seatsListInId :+= row * 8 + col
         })
 
