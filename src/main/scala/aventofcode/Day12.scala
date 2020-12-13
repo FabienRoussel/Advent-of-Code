@@ -113,7 +113,7 @@ object Day12 {
   }
 
   def main(args: Array[String]): Unit = {
-    println("Day 10 !")
+    println("Day 12 !")
     println("Challenge 1 : " + challenge1())
     println("Challenge 1 : " + challenge2())
   }
