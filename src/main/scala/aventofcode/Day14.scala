@@ -1,61 +1,111 @@
 package aventofcode
 
-object Day13 {
+object Day14 {
 
-  def extractData(list: List[String]):(Long, List[Int]) = {
-    val arrivalTime = list.head.toInt
-    val buses = list(1).replace("x,", "").split(',').map(_.toInt).toList
-    (arrivalTime, buses)
+  val MASK_SIZE = 36
+
+  def extractMemoryAndValueToWrite(str: String): (Int, Long) = {
+    val memoryInt: Int = str.takeRight(str.length - 4 ).split(']')(0).toInt
+    val valueToWrite = str.split("= ").last.toLong
+    (memoryInt, valueToWrite)
   }
 
-  def getWaitTime(arrivalTime: Long, bus: Int): Long = bus - arrivalTime % bus
+  def computeNumberInMemory(mask: String, number: Long): String = {
+    val binaryNum = number.toBinaryString
+    var newNumber: String = mask.take(MASK_SIZE - binaryNum.length).replace('X', '0') + binaryNum
 
-  def getEarliestBus(arrivalTime: Long, busesList: List[Int]): Int ={
-    var busTaken = 0
-    var minimalWaitTime: Long = busesList.max
-    busesList.foreach(bus =>{
-      val waitingTime = getWaitTime(arrivalTime, bus)
-      if( waitingTime < minimalWaitTime){
-        minimalWaitTime = waitingTime
-        busTaken = bus
-      }
-    })
-    busTaken
+    for(it <- mask.indices){
+      val char = if(mask(it) == 'X') newNumber(it) else mask(it)
+      newNumber = newNumber.substring(0,it) + char + newNumber.substring(it+1)
+    }
+
+    newNumber
   }
 
   def challenge1(list: List[String]): Long = {
-    val (arrivalTime, busesList) = extractData(list)
+    var mask: String = ""
+    var map: Map[Int, String] = Map[Int, String]()
 
-    val earliestBus = getEarliestBus(arrivalTime, busesList)
-    earliestBus * getWaitTime(arrivalTime, earliestBus)
+    list.foreach(el => {
+      if(el.take(4) == "mask") mask = el.takeRight(MASK_SIZE)
+      else{
+        val (memoryInt, valueToWrite) = extractMemoryAndValueToWrite(el)
+        map += (memoryInt -> computeNumberInMemory(mask, valueToWrite))
+      }
+    })
+
+    map.map(el => {
+      var sum: Long = 0
+      for(it <- el._2.indices){
+        sum += Math.pow(2, MASK_SIZE - it - 1).toLong * el._2.charAt(it).asDigit
+      }
+      sum
+    }).sum
   }
 
-  def getBusesWithIndex(busesList: List[String]): List[(Int, Int)] = {
-    busesList.zipWithIndex.collect{ case x if x._1!="x" => (x._1.toInt, x._2)}
+  def applyMask(mask: String, long: Long): String = {
+    val memory = long.toBinaryString
+    var address = "0" * (MASK_SIZE - memory.length) + memory
+
+    for(it <- mask.indices){
+      if(mask(it) == 'X') {
+        address = address.substring(0,it) + 'X' + address.substring(it+1)
+      } else {
+        val char = mask(it).asDigit | address(it).asDigit
+        address = address.substring(0,it) + char.toString + address.substring(it+1)
+      }
+    }
+
+    address
   }
 
-  def getTimestampForTwoBusSynchro(departure: Long, bus1: Long, bus2: Int, shift: Int): Long ={
-    var x = 0
-    while((bus1 * x + departure + shift) % bus2 != 0)
-      x += 1
-    bus1 * x + departure
+  def computeAdresses(address: String): List[String] = {
+    var addresses: List[String] = List[String]()
+
+    val nbX = address.count(_ == 'X')
+    val maxXValue = Math.pow(2, nbX).toInt
+    val zeroes: String = "0" * nbX
+
+    for(it <- 0 until maxXValue){
+      val itBinarySubString = it.toBinaryString
+      val itBinary: String = zeroes.take(zeroes.length - itBinarySubString.length) + itBinarySubString
+      var newAdress = address
+      for(it2 <- 0 until nbX)
+        newAdress = newAdress.replaceFirst("X", itBinary(it2).toString)
+      addresses = addresses :+ newAdress
+    }
+
+    addresses
   }
 
-  def findEarliestTimestamp(departure: Long, busesList: List[(Int, Int)]): Long ={
-    if(busesList.size < 2)
-      return 0
-    val departureSynchro = findEarliestTimestamp(departure, busesList.take(busesList.size - 1))
-    getTimestampForTwoBusSynchro(departureSynchro, busesList.take(busesList.size-1).map(x => x._1.toLong).product, busesList.last._1, busesList.last._2)
+  def writeMap(map: Map[String, Long], address: String, valueToWrite: Long): Map[String, Long] = {
+    var newMap = map
+    val adressesToWrite = computeAdresses(address)
+    adressesToWrite.foreach(el => {
+      newMap += (el -> valueToWrite)
+    })
+    newMap
   }
 
   def challenge2(list: List[String]): Long = {
-    val busesListWithDiff: List[(Int, Int)] = getBusesWithIndex(list(1).split(',').toList)
-    findEarliestTimestamp(0, busesListWithDiff)
+    var mask: String = ""
+    var map: Map[String, Long] = Map[String, Long]()
+
+    list.foreach(el => {
+      if(el.take(4) == "mask") mask = el.takeRight(36)
+      else{
+        val (memoryInt, valueToWrite) = extractMemoryAndValueToWrite(el)
+        val address = applyMask(mask, memoryInt)
+        map = writeMap(map, address, valueToWrite)
+      }
+    })
+
+    map.values.sum
   }
 
   def main(args: Array[String]): Unit = {
-    val list: List[String] = ReadFile.readFile("jour13.txt")
-    println("Day 13 !")
+    val list: List[String] = ReadFile.readFile("jour14.txt")
+    println("Day 14 !")
     println("Challenge 1 : " + challenge1(list))
     println("Challenge 2 : " + challenge2(list))
   }
