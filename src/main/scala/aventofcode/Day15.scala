@@ -1,10 +1,13 @@
 package aventofcode
 
+import scala.annotation.tailrec
+
 object Day15 {
 
   // For int given / last time this int was given
   var memory: Map[Int, Int] = Map[Int, Int]()
 
+  @tailrec
   def challenge1(lastNumber: Int, xThNumberSpoken: Int, turn: Int): Int = {
     if(xThNumberSpoken == 0) return lastNumber
     val newNumber = {
