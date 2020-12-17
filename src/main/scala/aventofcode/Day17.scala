@@ -3,26 +3,11 @@ package aventofcode
 object Day17 {
 
   def formatInput(list: List[String]): List[List[List[Char]]] = {
-    val outputSpace: List[List[Char]] = list.map(x => x.toCharArray.toList)
-    List(outputSpace)
+    List(list.map(x => x.toCharArray.toList))
   }
 
-  def printSpace(space: List[List[List[Char]]]) = {
-    space.foreach( matrice =>
-      matrice.foreach(row => {
-        row.foreach( cube => print(cube))
-        println()
-      })
-    )
-    println()
-  }
-
-  def computeCubeInActiveState(space: List[List[List[Char]]]): Int = {
-    space.flatten.flatten.count(_=='#')
-  }
-  def computeCubeInActiveState4D(space: List[List[List[List[Char]]]]): Int = {
-    space.flatten.flatten.flatten.count(_=='#')
-  }
+  def computeCubeInActiveState(space: List[List[List[Char]]]): Int = { space.flatten.flatten.count(_=='#') }
+  def computeCubeInActiveState4D(space: List[List[List[List[Char]]]]): Int = { space.flatten.flatten.flatten.count(_=='#') }
 
   def expandSpace(space: List[List[List[Char]]]): List[List[List[Char]]] = {
     val expandedSpace = space.map(z => List.fill(space.head.size+2)('.') :: z.map(y => '.' :: y ::: List('.')) ::: List(List.fill(space.head.size+2)('.')))
@@ -36,17 +21,21 @@ object Day17 {
     emptySpace3D :: expandedSpace ::: List(emptySpace3D)
   }
 
+  private def newStateFromCount(currentPosStatus: Char, count: Int): Char = {
+    count match {
+      case 2 | 3 if currentPosStatus == '#' => '#'
+      case 3 if currentPosStatus == '.' => '#'
+      case _ => '.'
+    }
+  }
+
   def computeNewCubeState(posX: Int, posY: Int, posZ: Int, space: List[List[List[Char]]]): Char= {
     val currentPosStatus = space(posZ)(posX)(posY)
     val subSpace = space.slice(posZ - 1, posZ + 2)
       .map(column   => column.slice(posX - 1, posX + 2)
         .map(row    => row.slice(posY - 1, posY + 2)))
     val count = computeCubeInActiveState(subSpace) - (if( currentPosStatus == '#') 1 else 0)
-    count match {
-      case 2 | 3 if currentPosStatus == '#' => '#'
-      case 3 if currentPosStatus == '.' => '#'
-      case _ => '.'
-    }
+    newStateFromCount(currentPosStatus, count)
   }
 
   def computeNewCubeState4D(posX: Int, posY: Int, posZ: Int, posW: Int, space4D: List[List[List[List[Char]]]]): Char= {
@@ -56,11 +45,7 @@ object Day17 {
         .map(column => column.slice(posX - 1, posX + 2)
           .map(row  => row.slice(posY - 1, posY + 2))))
     val count = computeCubeInActiveState4D(subSpace4D) - (if( currentPosStatus == '#') 1 else 0)
-    count match {
-      case 2 | 3 if currentPosStatus == '#' => '#'
-      case 3 if currentPosStatus == '.' => '#'
-      case _ => '.'
-    }
+    newStateFromCount(currentPosStatus, count)
   }
 
   def computeNewSpaceState(space: List[List[List[Char]]]): List[List[List[Char]]] = {
@@ -72,11 +57,11 @@ object Day17 {
   }
 
   def computeNewSpaceState4D(space4D: List[List[List[List[Char]]]]): List[List[List[List[Char]]]] = {
-    val expandedSpace: List[List[List[List[Char]]]] = expandSpace4D(space4D)
-    val updatedExpandedSpace = expandedSpace.zipWithIndex.map( space =>
+    val expandedSpace4D: List[List[List[List[Char]]]] = expandSpace4D(space4D)
+    val updatedExpandedSpace = expandedSpace4D.zipWithIndex.map( space =>
       space._1.zipWithIndex.map(
         matrice => matrice._1.zipWithIndex.map(
-          row => row._1.zipWithIndex.map(cube => computeNewCubeState4D(row._2, cube._2, matrice._2, space._2, expandedSpace)))))
+          row => row._1.zipWithIndex.map(cube => computeNewCubeState4D(row._2, cube._2, matrice._2, space._2, expandedSpace4D)))))
     updatedExpandedSpace
   }
 
