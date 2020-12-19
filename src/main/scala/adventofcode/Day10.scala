@@ -1,4 +1,4 @@
-package aventofcode
+package adventofcode
 
 
 object Day10 {

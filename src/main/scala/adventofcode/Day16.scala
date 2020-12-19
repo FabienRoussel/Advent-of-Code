@@ -1,4 +1,4 @@
-package aventofcode
+package adventofcode
 
 import scala.util.control.Breaks._
 

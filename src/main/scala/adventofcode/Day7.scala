@@ -1,4 +1,4 @@
-package aventofcode
+package adventofcode
 
 import scala.collection.mutable.Queue
 import scala.io.Source
